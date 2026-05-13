@@ -4,8 +4,6 @@ const fs = require('fs');
 const path = require('path');
 const mqtt = require('mqtt');
 
-router.use(express.json());
-
 const mqttClient = mqtt.connect('mqtt://localhost:1883');
 
 mqttClient.on('connect', () => {
@@ -20,83 +18,32 @@ router.get('/', function(req, res, next) {
     res.render('index', { title: 'Data-Logger' });
 });
 
-// ==========================================
-// RUTA POST
-// ==========================================
-router.post('/record', function(req, res, next) {
+function procesarDatos(id_nodo, temperatura, humedad, co2, volatiles) {
     const now = new Date();
-    const payload = req.body;
-
-    const id_nodo = payload.sensor_id;
-    const datos = payload.datos;
 
     const mensajeMQTT = {
         id_nodo: id_nodo,
         timestamp: now.getTime(),
-        temperatura: datos.temperatura,
-        humedad: datos.humedad,
-        co2: datos.co2,
-        volatiles: datos.volatiles
+        temperatura: parseFloat(temperatura),
+        humedad: parseFloat(humedad),
+        co2: parseFloat(co2),
+        volatiles: parseFloat(volatiles)
     };
 
     mqttClient.publish('sensores/datos', JSON.stringify(mensajeMQTT), (err) => {
         if (err) console.log('Error al publicar en MQTT:', err.message);
-        else console.log('Publicado en MQTT (POST):', JSON.stringify(mensajeMQTT));
+        else console.log('Publicado en MQTT (SOAP):', JSON.stringify(mensajeMQTT));
     });
 
-    const mesActual = now.getMonth() + 1;
-    const logfile_name = path.join(__dirname, '../public/logs/', id_nodo + "-" + now.getFullYear() + "-" + mesActual + "-" + now.getDate() + '.csv');
-
-    const content = `${id_nodo};${now.getTime()};${datos.temperatura};${datos.humedad};${datos.co2};${datos.volatiles}\r\n`;
-
-    fs.stat(logfile_name, function(err, stat) {
-        if(err == null) {
-            append2file(logfile_name, content);
-        } else if(err.code === 'ENOENT') {
-            let headers = 'id_nodo;timestamp;temperatura;humedad;CO2;volatiles\r\n';
-            append2file(logfile_name, headers + content);
-        } else {
-            console.log('Some other error: ', err.code);
-        }
-    });
-
-    res.status(200).send("Datos recibidos por POST y procesados.");
-});
-
-// ==========================================
-// RUTA GET
-// ==========================================
-router.get('/record', function(req, res, next) {
-    const now = new Date();
-
-    let payload;
-    try {
-        payload = JSON.parse(req.query.data);
-    } catch (e) {
-        return res.status(400).send("Bad Request: falta parámetro data o JSON inválido");
+    const logsDir = path.join(__dirname, '../public/logs/');
+    if (!fs.existsSync(logsDir)) {
+        fs.mkdirSync(logsDir, { recursive: true });
     }
 
-    const id_nodo = payload.sensor_id;
-    const datos = payload.datos;
-
-    const mensajeMQTT = {
-        id_nodo: id_nodo,
-        timestamp: now.getTime(),
-        temperatura: datos.temperatura,
-        humedad: datos.humedad,
-        co2: datos.co2,
-        volatiles: datos.volatiles
-    };
-
-    mqttClient.publish('sensores/datos', JSON.stringify(mensajeMQTT), (err) => {
-        if (err) console.log('Error al publicar en MQTT:', err.message);
-        else console.log('Publicado en MQTT (GET):', JSON.stringify(mensajeMQTT));
-    });
-
     const mesActual = now.getMonth() + 1;
-    const logfile_name = path.join(__dirname, '../public/logs/', id_nodo + "-" + now.getFullYear() + "-" + mesActual + "-" + now.getDate() + '.csv');
+    const logfile_name = path.join(logsDir, id_nodo + "-" + now.getFullYear() + "-" + mesActual + "-" + now.getDate() + '.csv');
 
-    const content = `${id_nodo};${now.getTime()};${datos.temperatura};${datos.humedad};${datos.co2};${datos.volatiles}\r\n`;
+    const content = `${id_nodo};${now.getTime()};${temperatura};${humedad};${co2};${volatiles}\r\n`;
 
     fs.stat(logfile_name, function(err, stat) {
         if(err == null) {
@@ -108,9 +55,7 @@ router.get('/record', function(req, res, next) {
             console.log('Some other error: ', err.code);
         }
     });
-
-    res.send("Datos recibidos por GET y procesados.");
-});
+}
 
 function append2file(file2append, content){
     fs.appendFile(file2append, content, function (err) {
@@ -118,4 +63,66 @@ function append2file(file2append, content){
     });
 }
 
-module.exports = router;
+router.post('/record', (req, res) => {
+    const body = req.body;
+
+    if (body && body.sensor_id && body.datos) {
+        procesarDatos(
+            body.sensor_id,
+            body.datos.temperatura,
+            body.datos.humedad,
+            body.datos.co2,
+            body.datos.volatiles
+        );
+        res.status(200).json({ status: "Datos recibidos vía POST" });
+    } else {
+        res.status(400).json({ error: "Payload inválido" });
+    }
+});
+
+router.get('/', function(req, res, next) {
+    if (req.query.data) {
+        try {
+            const payload = JSON.parse(req.query.data);
+            if (payload && payload.sensor_id && payload.datos) {
+                procesarDatos(
+                    payload.sensor_id,
+                    payload.datos.temperatura,
+                    payload.datos.humedad,
+                    payload.datos.co2,
+                    payload.datos.volatiles
+                );
+                return res.status(200).json({ status: "Datos recibidos vía GET" });
+            }
+        } catch (error) {
+            return res.status(400).json({ error: "JSON inválido en GET" });
+        }
+    }
+
+    res.render('index', { title: 'Data-Logger' });
+});
+
+const soapService = {
+    SensorService: {
+        SensorPort: {
+            RecordData: function(args) {
+                const id_nodo = args.sensor_id;
+                const temperatura = args.temperatura;
+                const humedad = args.humedad;
+                const co2 = args.co2;
+                const volatiles = args.volatiles;
+
+                procesarDatos(id_nodo, temperatura, humedad, co2, volatiles);
+
+                return {
+                    status: "Datos recibidos mediante SOAP y procesados correctamente."
+                };
+            }
+        }
+    }
+};
+
+module.exports = {
+    router,
+    soapService
+};

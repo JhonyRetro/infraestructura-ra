@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="ServidorDataLogger" 
+             targetNamespace="http://localhost:3000/wsdl" 
+             xmlns="http://schemas.xmlsoap.org/wsdl/" 
+             xmlns:tns="http://localhost:3000/wsdl" 
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
+    <!-- Definición de los mensajes -->
+    <message name="RecordDataRequest">
+        <part name="sensor_id" type="xsd:string"/>
+        <part name="temperatura" type="xsd:float"/>
+        <part name="humedad" type="xsd:float"/>
+        <part name="co2" type="xsd:float"/>
+        <part name="volatiles" type="xsd:float"/>
+    </message>
+    <message name="RecordDataResponse">
+        <part name="status" type="xsd:string"/>
+    </message>
+
+    <!-- Puerto -->
+    <portType name="SensorPortType">
+        <operation name="RecordData">
+            <input message="tns:RecordDataRequest"/>
+            <output message="tns:RecordDataResponse"/>
+        </operation>
+    </portType>
+
+    <!-- Binding -->
+    <binding name="SensorBinding" type="tns:SensorPortType">
+        <soap:binding style="rpc" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="RecordData">
+ <soap:operation soapAction="RecordData"/>
+            <input><soap:body use="literal"/></input>
+            <output><soap:body use="literal"/></output>
+        </operation>
+    </binding>
+
+    <!-- Servicio -->
+    <service name="SensorService">
+        <port name="SensorPort" binding="tns:SensorBinding">
+            <soap:address location="http://localhost:3000/wsdl"/>
+        </port>
+    </service>
+</definitions>
