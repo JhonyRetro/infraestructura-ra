@@ -5,7 +5,7 @@ import time
 import json
 
 estadisticas = {"enviados": 0, "errores": 0}
-
+delay = 9600
 
 async def sensor_node(session, sensor_id, endpoint_url, sleep_time):
     http_method = random.choice(["GET", "POST"])
@@ -26,7 +26,7 @@ async def sensor_node(session, sensor_id, endpoint_url, sleep_time):
 
         try:
             if http_method == "POST":
-                async with session.post(endpoint_url, json=payload, timeout=2) as response:
+                async with session.post(endpoint_url + "/record", json=payload, timeout=2) as response:
                     status = response.status
                 print(sensor_id, datos)
             else:
@@ -55,7 +55,7 @@ async def monitor_estadisticas():
 
 
 async def main():
-    endpoint_url = "http://localhost:3000/record"  # Cambiar por IP de lab
+    endpoint_url = "http://localhost:80"  # Cambiar por IP de lab
     sensores = 19737
     tiempo_dormido = 300.0
 
@@ -71,7 +71,7 @@ async def main():
 
             tasks.append(
                 asyncio.create_task(
-                    delayed_start(session, sensor_id, endpoint_url, tiempo_dormido, max_delay=7200.0)
+                    delayed_start(session, sensor_id, endpoint_url, tiempo_dormido, delay)
                 )
             )
 
