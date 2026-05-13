@@ -2,7 +2,39 @@ import paho.mqtt.client as mqtt
 from crate import client
 import json
 
-db_connection = client.connect("localhost:4200", username="crate")
+def inicializar_cratedb():
+    print("Conectando a CrateDB...")
+    db_connection = client.connect("localhost:4200", username="crate")
+    cursor = db_connection.cursor()
+
+    # Creamos la tabla sin usar ninguna consola visual
+    tabla_sql = """
+                CREATE TABLE IF NOT EXISTS sensores_datos \
+                ( \
+                    sensor_id \
+                    STRING, \
+                    "timestamp" \
+                    TIMESTAMP, \
+                    temperatura \
+                    DOUBLE, \
+                    humedad \
+                    DOUBLE, \
+                    co2 \
+                    DOUBLE, \
+                    volatiles \
+                    DOUBLE
+                ) CLUSTERED INTO 4 SHARDS; \
+                """
+
+    try:
+        cursor.execute(tabla_sql)
+        print("✅ Tabla 'sensores_datos' verificada o creada correctamente.")
+    except Exception as e:
+        print(f"❌ Error al inicializar CrateDB: {e}")
+
+    return db_connection
+
+db_connection = inicializar_cratedb()
 cursor = db_connection.cursor()
 
 def on_message(client, userdata, msg):
