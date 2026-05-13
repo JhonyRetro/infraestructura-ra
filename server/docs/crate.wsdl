@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions name="SensorMiddleware"
+             targetNamespace="http://example.com/sensormiddleware"
+             xmlns="http://schemas.xmlsoap.org/wsdl/"
+             xmlns:tns="http://example.com/sensormiddleware"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+             xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
+
+    <types>
+        <xsd:schema targetNamespace="http://example.com/sensormiddleware">
+            <xsd:element name="SensorData">
+                <xsd:complexType>
+                    <xsd:sequence>
+                        <xsd:element name="sensor_id" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+                        <xsd:element name="id_nodo" type="xsd:string" minOccurs="0" maxOccurs="1"/>
+                        <xsd:element name="timestamp" type="xsd:string"/>
+                        <xsd:element name="temperatura" type="xsd:float" minOccurs="0"/>
+                        <xsd:element name="humedad" type="xsd:float" minOccurs="0"/>
+                        <xsd:element name="co2" type="xsd:float" minOccurs="0"/>
+                        <xsd:element name="volatiles" type="xsd:float" minOccurs="0"/>
+                    </xsd:sequence>
+                </xsd:complexType>
+            </xsd:element>
+        </xsd:schema>
+    </types>
+
+    <message name="ReceiveDataMessage">
+        <part name="payload" element="tns:SensorData"/>
+    </message>
+
+    <portType name="SensorMiddlewarePortType">
+        <operation name="ReceiveData">
+            <input message="tns:ReceiveDataMessage"/>
+        </operation>
+    </portType>
+
+    <binding name="SensorMiddlewareBinding" type="tns:SensorMiddlewarePortType">
+        <soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+        <operation name="ReceiveData">
+            <soap:operation soapAction="ReceiveData"/>
+            <input>
+                <soap:body use="literal"/>
+            </input>
+        </operation>
+    </binding>
+
+    <service name="SensorMiddlewareService">
+        <port name="SensorMiddlewarePort" binding="tns:SensorMiddlewareBinding">
+            <soap:address location="mqtt://localhost:1883/sensores/datos"/>
+        </port>
+    </service>
+</definitions>

@@ -1,0 +1,9 @@
+[project]
+name = "infraestructura-ra"
+version = "0.1.0"
+requires-python = ">=3.14"
+dependencies = [
+    "aiohttp>=3.13.5",
+    "crate==2.1.2",
+    "paho-mqtt>=2.1.0",
+]
