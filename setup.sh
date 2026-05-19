@@ -48,7 +48,7 @@ fi
 
 echo "[4/5] Levantando servicios con la nueva configuración..."
 systemctl start mosquitto
-sudo -u alumno bash -c "nohup grafana server --config=/etc/grafana/grafana.ini --homepath=/usr/share/grafana > ./service/grafana.log 2>&1 &"
+sudo -u alumno bash -c "sudo nohup grafana server --config=/etc/grafana/grafana.ini --homepath=/usr/share/grafana > ./service/grafana.log 2>&1 &"
 systemctl start haproxy
 
 if systemctl is-active --quiet haproxy; then
