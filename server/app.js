@@ -6,12 +6,26 @@ const logger = require('morgan');
 const serveIndex = require('serve-index');
 const soap = require('soap');
 const fs = require('fs');
-
+const blacklist = [
+    '::1'
+];
 const indexModule = require('./routes/index');
 const usersRouter = require('./routes/users');
 
 const app = express();
+function ipFilterMiddleware(req, res, next) {
 
+    const clientIP = req.ip;
+
+    console.log("IP detectada:", clientIP);
+
+    if (blacklist.includes(clientIP)) {
+        console.log("IP bloqueada:", clientIP);
+        return res.status(403).send('Access denied');
+    }
+
+    next();
+}
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
@@ -20,7 +34,7 @@ app.use(express.json());
 app.use(express.urlencoded({extended: false}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
-
+app.use(ipFilterMiddleware);
 app.use('/', indexModule.router);
 app.use('/users', usersRouter);
 app.use('/logs', serveIndex(path.join(__dirname, 'public/logs')));
