@@ -8,6 +8,7 @@ NODE_BINARY="/home/alumno/.nvm/versions/node/v24.15.0/bin/node"
 NODE_APP="./server/"
 HAPROXY_CONF="./server/haproxy.cfg"
 MOSQUITTO_CONF="./broker/mosquitto.conf"
+GRAFANA_BINARY="/usr/share/grafana/bin/grafana"
 GRAFANA_CONF="./service/grafana.ini"
 
 echo "Iniciando despliegue de infraestructura..."
@@ -48,7 +49,7 @@ fi
 
 echo "[4/5] Levantando servicios con la nueva configuración..."
 systemctl start mosquitto
-sudo -u alumno bash -c "sudo nohup grafana server --config=/etc/grafana/grafana.ini --homepath=/usr/share/grafana > ./service/grafana.log 2>&1 &"
+sudo -u alumno bash -c "sudo nohup $GRAFANA_BINARY server --config=/etc/grafana/grafana.ini --homepath=/usr/share/grafana > ./service/grafana.log 2>&1 &"
 systemctl start haproxy
 
 if systemctl is-active --quiet haproxy; then
