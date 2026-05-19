@@ -6,6 +6,7 @@ fi
 
 NODE_BINARY="/home/alumno/.nvm/versions/node/v24.15.0/bin/node"
 NODE_APP="./server/"
+UV_BINARY="/home/alumno/.local/bin/uv"
 MIDDLEWARE_CRATE="./db/"
 SENSORS="./sensors/"
 HAPROXY_CONF="./server/haproxy.cfg"
