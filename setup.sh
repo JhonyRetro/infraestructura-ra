@@ -4,6 +4,7 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
+NODE_BINARY="/home/alumno/.nvm/versions/node/v24.15.0/bin/node"
 NODE_APP="./server/"
 HAPROXY_CONF="./server/haproxy.cfg"
 MOSQUITTO_CONF="./broker/mosquitto.conf"
@@ -59,11 +60,11 @@ if [ -d "$NODE_APP" ]; then
     cd "$NODE_APP" || exit
 
     export PORT=3000
-    nohup node app.js > node_3000.log 2>&1 &
+    nohup $NODE_BINARY app.js > node_3000.log 2>&1 &
     echo "  -> Nodo 1 (Puerto 3000) en ejecución [PID: $!]"
 
     export PORT=3001
-    nohup node app.js > node_3001.log 2>&1 &
+    nohup $NODE_BINARY > node_3001.log 2>&1 &
     echo "  -> Nodo 2 (Puerto 3001) en ejecución [PID: $!]"
 else
     echo "Error: No se encontró la ruta del proyecto Node ($NODE_APP)"
