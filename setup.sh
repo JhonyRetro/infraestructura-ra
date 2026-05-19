@@ -45,7 +45,7 @@ fi
 
 echo "[4/5] Levantando servicios con la nueva configuración..."
 systemctl start mosquitto
-systemctl start grafana-server
+nohup grafana-server > ./service/grafana.log
 systemctl start haproxy
 
 if systemctl is-active --quiet haproxy; then
