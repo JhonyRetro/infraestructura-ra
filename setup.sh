@@ -30,16 +30,19 @@ echo "[3/5] Copiando archivos de configuración a sus rutas por defecto..."
 
 if [ -f "$HAPROXY_CONF" ]; then
     cp "$HAPROXY_CONF" /etc/haproxy/haproxy.cfg
+    chmod 644 /etc/haproxy/haproxy.cfg
     echo "  -> HAProxy config actualizada."
 fi
 
 if [ -f "$MOSQUITTO_CONF" ]; then
     cp "$MOSQUITTO_CONF" /etc/mosquitto/mosquitto.conf
+    chmod 644 /etc/mosquitto/mosquitto.conf
     echo "  -> Mosquitto config actualizada."
 fi
 
 if [ -f "$GRAFANA_CONF" ]; then
     cp "$GRAFANA_CONF" /etc/grafana/grafana.ini
+    chmod 644 /etc/grafana/grafana.ini
     echo "  -> Grafana config actualizada."
 fi
 
