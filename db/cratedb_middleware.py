@@ -28,9 +28,9 @@ def inicializar_cratedb():
 
     try:
         cursor.execute(tabla_sql)
-        print("✅ Tabla 'sensores_datos' verificada o creada correctamente.")
+        print("Tabla 'sensores_datos' verificada o creada correctamente.")
     except Exception as e:
-        print(f"❌ Error al inicializar CrateDB: {e}")
+        print(f"Error al inicializar CrateDB: {e}")
 
     return db_connection
 
