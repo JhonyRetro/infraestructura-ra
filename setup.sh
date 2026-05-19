@@ -45,7 +45,7 @@ fi
 
 echo "[4/5] Levantando servicios con la nueva configuración..."
 systemctl start mosquitto
-su -c alumno nohup grafana server > ./service/grafana.log
+sudo -u alumno bash -c "nohup grafana server --config=/etc/grafana/grafana.ini --homepath=/usr/share/grafana > ./service/grafana.log 2>&1 &"
 systemctl start haproxy
 
 if systemctl is-active --quiet haproxy; then
@@ -64,7 +64,7 @@ if [ -d "$NODE_APP" ]; then
     echo "  -> Nodo 1 (Puerto 3000) en ejecución [PID: $!]"
 
     export PORT=3001
-    nohup $NODE_BINARY > node_3001.log 2>&1 &
+    nohup $NODE_BINARY app.js > node_3001.log 2>&1 &
     echo "  -> Nodo 2 (Puerto 3001) en ejecución [PID: $!]"
 else
     echo "Error: No se encontró la ruta del proyecto Node ($NODE_APP)"
