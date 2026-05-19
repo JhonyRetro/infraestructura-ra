@@ -59,11 +59,11 @@ if [ -d "$NODE_APP" ]; then
     cd "$NODE_APP" || exit
 
     export PORT=3000
-    nohup node index.js > node_3000.log 2>&1 &
+    nohup node app.js > node_3000.log 2>&1 &
     echo "  -> Nodo 1 (Puerto 3000) en ejecución [PID: $!]"
 
     export PORT=3001
-    nohup node index.js > node_3001.log 2>&1 &
+    nohup node app.js > node_3001.log 2>&1 &
     echo "  -> Nodo 2 (Puerto 3001) en ejecución [PID: $!]"
 else
     echo "Error: No se encontró la ruta del proyecto Node ($NODE_APP)"
