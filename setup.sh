@@ -4,7 +4,7 @@ if [ "$EUID" -ne 0 ]; then
   exit 1
 fi
 
-NODE_APP="./server/app.js"
+NODE_APP="./server/"
 HAPROXY_CONF="./server/haproxy.cfg"
 MOSQUITTO_CONF="./broker/mosquitto.conf"
 GRAFANA_CONF="./service/grafana.ini"
