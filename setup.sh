@@ -81,7 +81,7 @@ fi
 echo "[6/7] Levantando middleware de Crate y MQTT"
 if [ -d "$MIDDLEWARE_CRATE" ]; then
     cd "$MIDDLEWARE_CRATE"
-    nohup uv run cratedb_middleware.py
+    nohup $UV_BINARY run cratedb_middleware.py
     cd ..
 else
     echo "Error: No se encontró la ruta del middleware ($MIDDLEWARE_CRATE)"
@@ -91,7 +91,7 @@ echo "[7/7] Levantando simulación de sensores..."
 
 if [ -d "$SENSORS" ]; then
     cd "$SENSORS"
-    nohup uv run cratedb_middleware.py
+    nohup $UV_BINARY run cratedb_middleware.py
     cd ..
 else
     echo "Error: No se encontró la ruta de los sensores ($SENSORS)"
