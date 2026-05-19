@@ -6,6 +6,8 @@ fi
 
 NODE_BINARY="/home/alumno/.nvm/versions/node/v24.15.0/bin/node"
 NODE_APP="./server/"
+MIDDLEWARE_CRATE="./db/"
+SENSORS="./sensors/"
 HAPROXY_CONF="./server/haproxy.cfg"
 MOSQUITTO_CONF="./broker/mosquitto.conf"
 GRAFANA_BINARY="/usr/share/grafana/bin/grafana"
@@ -70,8 +72,28 @@ if [ -d "$NODE_APP" ]; then
     export PORT=3001
     nohup $NODE_BINARY app.js > node_3001.log 2>&1 &
     echo "  -> Nodo 2 (Puerto 3001) en ejecución [PID: $!]"
+    cd ..
 else
     echo "Error: No se encontró la ruta del proyecto Node ($NODE_APP)"
+fi
+
+echo "[6/7] Levantando middleware de Crate y MQTT"
+if [ -d "$MIDDLEWARE_CRATE" ]; then
+    cd "$MIDDLEWARE_CRATE"
+    nohup uv run cratedb_middleware.py
+    cd ..
+else
+    echo "Error: No se encontró la ruta del middleware ($MIDDLEWARE_CRATE)"
+fi
+
+echo "[7/7] Levantando simulación de sensores..."
+
+if [ -d "$SENSORS" ]; then
+    cd "$SENSORS"
+    nohup uv run cratedb_middleware.py
+    cd ..
+else
+    echo "Error: No se encontró la ruta de los sensores ($SENSORS)"
 fi
 
 echo "¡Despliegue finalizado!"
