@@ -62,8 +62,33 @@ function append2file(file2append, content){
         if (err) throw err;
     });
 }
+// =======================
+// TOKEN BUCKET
+// =======================
+let tokens = 10;
+const MAX_TOKENS = 10;
+const REFILL_INTERVAL_MS = 1000;
 
-router.post('/record', (req, res) => {
+setInterval(() => {
+    if (tokens < MAX_TOKENS) {
+        tokens++;
+    }
+}, REFILL_INTERVAL_MS);
+
+function tokenBucketMiddleware(req, res, next) {
+    if (tokens > 0) {
+        tokens--;
+        console.log(`Token Bucket: petición permitida. Tokens restantes: ${tokens}`);
+        return next();
+    }
+
+    console.log('Token Bucket: petición bloqueada');
+    return res.status(429).json({
+        error: 'Demasiadas peticiones. Inténtalo más tarde.'
+    });
+}
+
+router.post('/record', tokenBucketMiddleware, (req, res) => {
     const body = req.body;
 
     if (body && body.sensor_id && body.datos) {
@@ -80,7 +105,7 @@ router.post('/record', (req, res) => {
     }
 });
 
-router.get('/', function(req, res, next) {
+router.get('/record', tokenBucketMiddleware, function(req, res, next) {
     if (req.query.data) {
         try {
             const payload = JSON.parse(req.query.data);
